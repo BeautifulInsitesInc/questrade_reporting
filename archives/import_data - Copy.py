@@ -13,7 +13,7 @@ import urllib
 from tkinter import *
 from tkinter import messagebox # even though everything was imported messagebox still needs to be implicidly imported
 from tkinter import ttk, filedialog, simpledialog
-from PIL import ImageTk, Image # install pillow for images
+#from PIL import ImageTk, Image # install pillow for images
 from openpyxl.workbook import Workbook
 from openpyxl import load_workbook
 from openpyxl.styles import Font, Border, Side
@@ -25,68 +25,77 @@ import sys
 from IPython.display import display
 
 master_account ='corporate1'
+user_id="Nil"
 export_folder ='D:\Dropbox\Test folder'
-excel_file_full_path = 'D:\Dropbox\Test folder\riskmit_questrade.xlsx'
+excel_file_full_path = 'D:\Dropbox\Test folder/reporting_test.xlsx'
 excel_filename = 'riskmit_questrade.xlsx'
 access_token ='nil'
 TOKEN_PATH = 'D:\Dropbox\- INVESTINU\- QUESTRADE_API EXPORTS\questrade.json'
-
+button_width = 19
+button_padding = 2
+button_color1 = 'black'
+button_text_color1 = 'white'
+button_color2 = 'blue'
+label_width = 30
 
 # Moms token YaHqygHc1gSIvn3bcA1FT2Zp_sWgvSMr0
 
 # =========================== GUI =============================
 root = Tk()
 root.title("InvestInU Reporting")
-root.geometry("500x600")
+#root.geometry("500x600")
 root.iconbitmap('favicon.ico')
 
-root.columnconfigure(0, weight=1)
-root.columnconfigure(1, weight=3)
+#root.columnconfigure(0, weight=1)
+#root.columnconfigure(1, weight=3)
 
 # =============== PRINT VARIABLES FOR TESTING ===========
 def print_vars():
     print('----------------------------')
     print('master_account : ',master_account)
+    print('user_id :',user_id)
     print('export_folder :',export_folder)
     print('excel_filename :',excel_filename)
     print('excel_file_full_path :',excel_file_full_path)
     print('access_token :',access_token)
     print('-----------------------------')
     print('TOKEN_PATH = ', TOKEN_PATH)
-    return()
 
-print_vars_button = Button(root, text='PRINT VARIABLES', command=print_vars)
-print_vars_button.grid(row=15, column=1, sticky="W", pady=(30,0))
+print_vars_button = Button(root, text='PRINT VARIABLES', command=print_vars, width=button_width, bg ='brown')
+print_vars_button.grid(row=15, column=0, sticky="W", pady=(10,0))
 
 # ================= SET TOKEN_PATH ===================
-def token_path_set():
+def token_path_set(account):
 	global export_folder
-	global master_account
-	token_path = export_folder+'/'+master_account+'-questrade.json'
+	#global master_account
+	token_path = export_folder+'/'+account+'-questrade.json'
 	print('Token Path Set : ',token_path)
 	return(token_path)
 
-TOKEN_PATH=token_path_set()
+TOKEN_PATH=token_path_set(master_account)
 
 # =============== SELECT MASTER ACCOUNT =======================s
-def master_account_set(*args):
+def master_account_set(account, *args):
     global master_account
     global TOKEN_PATH
-    master_account = master_account_combo.get()
-    master_account_label.config(text=master_account)
-    TOKEN_PATH = token_path_set()
+    #master_account = master_account_combo.get()
+    #master_account_label.config(text=master_account)
+    master_account = account
+    master_account_label.config(text=account)
+    TOKEN_PATH = token_path_set(account)
+    allinone_token_set()
+    #if 'normal'== w1.state(): # root.state getst he state of the window, normal means its open
     print_vars()
-    return()
 
 options = ["corporate1", "corporate2", "personal"]
 
-master_account_label = Label(root, text=options[0], relief = "flat")
+master_account_label = Label(root, text=options[0], relief = "flat", width=label_width, anchor=W)
 master_account_label.grid(row=0, column=1, sticky="W")
 
-master_account_combo = ttk.Combobox(root, value=options)
+master_account_combo = ttk.Combobox(root, value=options, width=20)
 master_account_combo.current(0)
 master_account_combo.grid(row=0, column=0, sticky="W")
-master_account_combo.bind('<<ComboboxSelected>>', master_account_set)
+master_account_combo.bind('<<ComboboxSelected>>', lambda x: master_account_set(master_account_combo.get()))
 
 # ======== EXPORT FOLDER SET ====================
 def export_folder_set():
@@ -96,22 +105,22 @@ def export_folder_set():
 	exportfolder_label.config(text = export_folder)
 	TOKEN_PATH = export_folder+'/'+master_account+'-questrade.json'
 
-exportfolder_button = Button(root, text="EXPORT FOLDER", command=export_folder_set)
-exportfolder_button.grid(row=2, column=0, sticky="W", pady=(10,0))
-exportfolder_label = Label(root, text=export_folder, relief = 'flat')
-exportfolder_label.grid(row=2, column=1, sticky="W")#can pad with pady or padx
+exportfolder_button = Button(root, text="EXPORT FOLDER", command=export_folder_set, width=button_width, bg=button_color1, fg=button_text_color1)
+exportfolder_button.grid(row=2, column=0, sticky="W", pady=(button_padding,0))
+exportfolder_label = Label(root, text=export_folder, relief = 'flat', width=label_width, anchor=W)
+exportfolder_label.grid(row=2, column=1, sticky="W", pady=(button_padding,0))#can pad with pady or padx
 
-#============== SELECT EXCEL FILE ================
+#============== SELECT ACTIVE EXCEL FILE ================
 def excel_filename_set():
 	global excel_file_full_path
-	excel_file_full_path = filedialog.askopenfilename(initialdir='/Dropbox', title="Select Excel Workbook", filetypes=(("xlsx Fiel", ".xlsx"),("All Files","*.*")))
+	excel_file_full_path = filedialog.askopenfilename(initialdir=export_folder, title="Select Excel Workbook", filetypes=(("xlsx Fiel", ".xlsx"),("All Files","*.*")))
 	print(excel_filename)
 	excel_filename_label.config(text = excel_file_full_path)
 
-excel_filename_button = Button(root, text="ACTIVE WORKBOOK", command=excel_filename_set)
-excel_filename_button.grid(row=3, column=0, sticky="W", pady=(20,0))
-excel_filename_label = Label(root, text=excel_file_full_path, relief = 'flat')
-excel_filename_label.grid(row=3, column=1, sticky="W",pady=(20,0))#can pad with pady or padx
+excel_filename_button = Button(root, text="ACTIVE WORKBOOK", command=excel_filename_set, width=button_width, bg=button_color1, fg=button_text_color1)
+excel_filename_button.grid(row=3, column=0, sticky="W", pady=(button_padding,0))
+excel_filename_label = Label(root, text=excel_file_full_path, relief = 'flat', width=label_width, anchor=W)
+excel_filename_label.grid(row=3, column=1, sticky="W",pady=(button_padding,0))#can pad with pady or padx
 
 #============== CREATE NEW EXCEL FILE =================
 def create_excel_wb():
@@ -126,29 +135,28 @@ def create_excel_wb():
     messagebox.showinfo('CONFIRMATION', "A New Excel WB : "+excel_file_full_path)
     excel_filename_label.config(text = excel_file_full_path)
     create_excel_label.config(text =excel_filename)
-    return()
 
 	# showinfo, showwarning, showerror, askquestion, askokcancel,askyesno
 
-create_excel_button = Button(root, text="CREATE NEW WB", command=create_excel_wb)
-create_excel_button.grid(row=4, column=0, sticky="W")
-create_excel_label = Label(root, text=excel_filename, relief = 'flat')
-create_excel_label.grid(row=4, column=1, sticky="W",pady=(20,0))#can pad with pady or padx
+create_excel_button = Button(root, text="CREATE NEW WB", command=create_excel_wb, width=button_width, bg=button_color1, fg=button_text_color1)
+create_excel_button.grid(row=4, column=0, sticky="W",pady=(button_padding,0))
+create_excel_label = Label(root, text=excel_filename, relief = 'flat', width=label_width, anchor=W)
+create_excel_label.grid(row=4, column=1, sticky="W",pady=(button_padding,0))#can pad with pady or padx
 
 # ================ ACCESS TOKEN SET ==================================================
 def access_token_set():
-	global access_token
-	access_token = simpledialog.askstring(title="ACCESS TOKEN", prompt='New Token : ')
+    global access_token
+    access_token = simpledialog.askstring(title="ACCESS TOKEN", prompt='New Token : ')
     #access_token = access_token_input.get()
-	print('access_token = ',access_token)
-	access_token_label.config(text = "CURRENT TOKEN : "+str(access_token))
+    print('access_token = ',access_token)
+    access_token_label.config(text = "CURRENT TOKEN : "+str(access_token))
 
 
-access_token_button = Button(root, text='ACCESS TOKEN', command=access_token_set)
-access_token_button.grid(row=7, column=0, sticky="W")
+access_token_button = Button(root, text='ACCESS TOKEN', command=access_token_set, width=button_width, bg=button_color1, fg=button_text_color1)
+access_token_button.grid(row=7, column=0, sticky="W", pady=(button_padding,0))
 
-access_token_label = Label(root, text='Enter Access Token', relief = "flat")
-access_token_label.grid(row=7, column=1, sticky="W", pady=(20,0))
+access_token_label = Label(root, text='Enter Access Token', relief = "flat", width=label_width, anchor=W)
+access_token_label.grid(row=7, column=1, sticky="W", pady=(button_padding,0))
 
 # =========  QUESTRADE API WRAPPER --- QUESTRADE.PY ============
 CONFIG_PATH = os.path.join(os.path.abspath(
@@ -352,10 +360,9 @@ def token_registration_set():
 	global q
 	q = Questrade(refresh_token=access_token)
 	print('Token registered: ',q)
-	return()
 
-token_registration = Button(root, text="TOKEN REGISTRATION", command = token_registration_set)
-token_registration.grid(row=20, column=0, sticky="W")
+#token_registration = Button(root, text="TOKEN REGISTRATION", command = token_registration_set)
+#token_registration.grid(row=20, column=0, sticky="W")
 
 # ========== AFTET TOKEN IS REGISTERED USE THIS ======
 def refresh_token_set():
@@ -364,8 +371,8 @@ def refresh_token_set():
 	print('Refresh token retrieved : ',q)
 	return()
 
-token_refresh = Button(root, text="TOKEN REFRESH", command = refresh_token_set)
-token_refresh.grid(row=20, column=1, sticky="W")
+#token_refresh = Button(root, text="TOKEN REFRESH", command = refresh_token_set)
+#token_refresh.grid(row=20, column=1, sticky="W")
 
 #============== SERVER TIME ========================
 def server_time():
@@ -395,38 +402,20 @@ def start_date(days_back):
     start_date_label.config(text = start)
     return(start)
 
-server_time_button = Button(root, text="SERVER TIME", command = server_time)
+server_time_button = Button(root, text="SERVER TIME", command = server_time, width=button_width, bg=button_color2, fg=button_text_color1)
 server_time_button.grid(row=22, column=0, sticky="W")
 server_time_label = Label(root, text=' ', relief = "flat")
-server_time_label.grid(row=22, column=1, sticky="W",pady=(10,0))
+server_time_label.grid(row=22, column=1, sticky="W",pady=(button_padding,0))
 
-time_name_button = Button(root, text="TIME NAME", command = time_name)
+time_name_button = Button(root, text="TIME NAME", command = time_name, width=button_width, bg=button_color2, fg=button_text_color1)
 time_name_button.grid(row=23, column=0, sticky="W")
 time_name_label = Label(root, text=' ', relief = "flat")
-time_name_label.grid(row=23, column=1, sticky="W",pady=(10,0))
+time_name_label.grid(row=23, column=1, sticky="W",pady=(button_padding,0))
 
-start_date_button = Button(root, text="START DATE", command = lambda: start_date(30))
+start_date_button = Button(root, text="START DATE", command = lambda: start_date(30), width=button_width, bg=button_color2, fg=button_text_color1)
 start_date_button.grid(row=24, column=0, sticky="W")
 start_date_label = Label(root, text=' ', relief = "flat")
-start_date_label.grid(row=24, column=1, sticky="W",pady=(10,0))
-
-
-# ============= ACCOUNTS ===========================
-def accounts():
-    global q
-    global user_id
-    global export_folder
-    dict_accounts = q.accounts
-    user_id = q.accounts['userId']
-    df_accounts = pd.DataFrame.from_dict(q.accounts['accounts']) #de-nest the accounts dict and make df
-    filename = os.path.join(export_folder, str(user_id)+'-accounts.xlsx')
-    df_accounts.to_excel(filename, header=True, )
-    #df_accounts.to_excel(excel_file_full_path, sheet_name="accounts", index=False)
-    display(df_accounts)
-    return(df_accounts)
-
-accounts_button = Button(root, text="ACCOUNTS", command = lambda: accounts())
-accounts_button.grid(row=30, column=0, sticky="W", pady=(10,0))
+start_date_label.grid(row=24, column=1, sticky="W",pady=(button_padding,0))
 
 # ========== ALL IN ONE TOKEN REFRESH ======
 def allinone_token_set():
@@ -451,14 +440,259 @@ def allinone_token_set():
             aio_token_label.config(text = "NEW REGISTRATION SUCCCESFUL! - "+master_account)
         except Exception:
             print('WE HAVE A BIGGER PROBLEM')
-    return()
 
-aio_token_button = Button(root, text="ALL-IN-ONE REGISTER", command = allinone_token_set)
-aio_token_button.grid(row=21, column=0, sticky="W", pady=20)
+aio_token_button = Button(root, text="ALL-IN-ONE REGISTER", command = allinone_token_set, width=button_width, bg='yellow', fg='black')
+aio_token_button.grid(row=21, column=0, sticky="W", pady=15)
 
 aio_token_label = Label(root, text='NOT REGISTERED', relief = "flat")
 aio_token_label.grid(row=21, column=1, sticky="W")
 
+#=================================================================================
+# ================================ ACCOUNTS ======================================
+def accounts():
+    global q
+    global user_id
+    global export_folder
+    dict_accounts = q.accounts
+    user_id = q.accounts['userId']
+    df = pd.DataFrame.from_dict(q.accounts['accounts']) #de-nest the accounts dict and make df
+
+    # ------- save to excel file ---------------
+    filename = os.path.join(export_folder, str(user_id)+'-accounts.xlsx')
+    df.to_excel(filename, header=True, )
+    try:
+        df.to_excel(excel_file_full_path, sheet_name="accounts", index=False)
+        print('Successfully exported')
+    except:
+        print('Excel exoport failed')
+    display(df)
+
+    return df
+
+#==================================================================================
+# ===================== ACCOUNT BALANCES ==========================================
+def account_balances(account_id):
+    global q
+    filename = os.path.join(filefolder, id+'-balances-'+time_name()+'.xlsx')
+    dict_balances = q.account_balances(id)
+    df_combined_balances3 = pd.DataFrame.from_dict(dict_balances['sodPerCurrencyBalances'])# sod per Currency balances : The MOST ACCURATE to what is shown in account.
+    df_combined_balances4= pd.DataFrame.from_dict(dict_balances['sodCombinedBalances'])# sod combined balances : Combined totals of sod per currency for use in 3rd row
+    display(df_combined_balances3)
+    display(df_combined_balances4)
+    df_combined_balances3.to_excel(filename, header=True)
+    df_combined_balances4.to_excel(filename, header=True)
+    return('success')
+
+#========================================================================================
+#----------- REVIEW WINDOW --------------------------------------------------------------
+#========================================================================================
+
+def accounts_window():
+    print('accounts_window started')
+    allinone_token_set()
+    accounts()
+    w1 = Toplevel(root)
+    w1.geometry('1500x800')
+    w1.title('ACCOUNTS')
+
+    #style
+    style=ttk.Style()
+    #Theme
+    style.theme_use('default')
+    #Confirgure treeview colors
+    style.configure("Treeview",
+        background="#D3D3D3",
+        foreground='black',
+        rowheight=25,
+        fieldbackground='#D3D3D3'
+        )
+
+    # CHANGE SELECTED COLOR
+    style.map('Treeview',
+        background=[('selected', '#347083')]
+        )
+
+
+    # ---- MASTER ACCOUNT FRAME
+    frame_ma = LabelFrame(w1, text="Master Account")
+    frame_ma.place(x=5,y=5, height=100, width=250) # set the height and width
+
+    # -------- ACCOUNTS FRAME
+    frame_accounts = LabelFrame(w1, text="Account Listing")
+    frame_accounts.place(x=5, y=110, height=200, width=250) # set the height and width of Jake is a Bad Dog
+    #    create accounts scroll bar
+
+    accounts_scroll = Scrollbar(frame_accounts) # add scroll bar
+    accounts_scroll.pack(side=RIGHT, fill=Y)
+    #    create tree
+    accounts_tree = ttk.Treeview(frame_accounts, yscrollcommand=accounts_scroll.set, selectmode="extended")
+    accounts_tree.pack()
+    #    control the scroll bar
+    accounts_scroll.config(command=accounts_tree.yview)
+
+
+
+    # balance frame
+    frame_balance = LabelFrame(w1, text="Balances")
+    frame_balance.place(x=260, y=5, height=100, width=800)
+
+    # positions frame
+    frame_positions = LabelFrame(w1, text="Positions")
+    frame_positions.place(x=260, y=110, height=400, width=400)
+
+    close_button = Button(w1, text='CLOSE', command=w1.destroy)
+    close_button.place(rely=.90, relx=.5)
+
+    # TreeView Widget
+    # -------------- MASTER ACCOUNT LIST ------------
+    #tree_ma = ttk.Treeview(frame_ma)
+    #tree_ma.place(relheight=1, relwidth=1)
+
+    # ----------- ACCOUNT LIST ----------------------
+    
+    #treescrolly = ttk.Scrollbar(frame_accounts, orient='vertical', command = accounts_tree.yview) # create scrollbar
+    #treescrollx = ttk.Scrollbar(frame_accounts, orient='horizontal', command = accounts_tree.xview) # create scrollbar
+    #accounts_tree.configure(yscrollcommand=treescrolly.set) #assign the scrollbar to tree widget
+    #accounts_tree.configure(xscrollcommand=treescrollx.set)
+    #treescrolly.pack(side='right', fill='y')
+    #treescrollx.pack(side='bottom', fill='y')
+
+    def draw_ma():
+        print('running draw_ma')
+        global options
+        global user_id
+        global user_id_lable
+        ma_combo = ttk.Combobox(frame_ma, value=options, width=20)
+        ma_combo.current(0)
+        ma_combo.grid(row=0, column=0, sticky="W")
+        print('about to run master_account_set')
+        ma_combo.bind('<<ComboboxSelected>>', lambda x: master_account_change(ma_combo.get()))
+        user_id_lable = Label(frame_ma, text='ID: '+str(user_id), relief = "flat")
+        user_id_lable.grid(row=2, column=0, pady=5, sticky='W')
+        print('setting token')
+        #allinone_token_set()
+        print("token set, drawing accounts")
+        draw_accounts()
+        print('complete')
+        return()
+
+    def draw_accounts():
+        print('running draw_accounts')
+        accounts_tree.delete(*accounts_tree.get_children()) # clear any previous tree
+        w1.update() #refresh window
+        df = accounts()
+        df_summary = df
+        df_summary = df_summary.drop(['status','isPrimary','isBilling'], axis=1)
+        print('df is back: ',df)
+        print('here is the summary: ',df_summary)
+        
+        # column headings
+        accounts_tree['columns'] = list(df_summary.columns)
+        accounts_tree['show']= 'headings'
+        for column in accounts_tree['columns']:
+            accounts_tree.heading(column, text=column)
+            accounts_tree.column(column, width=70)
+
+        #rows
+        df_rows = df_summary.to_numpy().tolist() #turns dataframe into list of lists
+        for row in df_rows:
+            accounts_tree.insert("", "end", values=row)
+        #bindings
+        accounts_tree.bind('<ButtonRelease-1>', account_click)
+        return()
+
+    def master_account_change(masteraccount):
+        print('running master_account_change')
+        global user_id_lable
+        master_account_set(masteraccount) #switch token to correction account
+        allinone_token_set() # connect to new token
+        accounts() #renew acounts to get new id
+        draw_accounts() #redraw them on screen 
+        user_id_lable.config(text='ID: '+str(user_id))
+
+    def account_click(e):
+        print("account was clicked! : ",e)
+
+    draw_ma()
+    draw_accounts()
+
+    w1.mainloop()
+
+    #==========     END OF WINDOW LOOP ====================================
+
+# =========================================================================
+# ============ DATABASE ===================================================
+#==========================================================================
+def create_database():
+    conn = sqlite3.connect('riskmit.db')
+    c = conn.cursor() #Create a cursor instance
+    #  ------------ user table ---------------------
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+        id integer PRIMARYH KEY,
+        user_name text unique,
+        first_name text,
+        last_name text,
+        
+        user_id integer)
+        ''')
+
+    # ------------- master account table -------------
+    c.execute('''CREATE TABLE IF NOT EXISTS master_accounts(
+            id integer PRIMARY KEY,
+            account_id integer,
+            account_name text unique
+            )''')
+    # ------------ live positions -----------------
+    #c.execute('''CREATE TABLE if not exists positions (
+    #    
+    #    )
+    #    ''')
+
+
+
+    conn.commit() # Commit changes
+    c.close()
+    conn.close() # close data base
+
+
+
+#create_database()
+
+# ------ ADD USERS TO MASTER ACCOUNT LIST -------
+def add_ma_users():
+    global options
+    conn = sqlite3.connect('riskmit.db')
+    c = conn.cursor()
+    for name in options:
+        try:
+            c.execute('''INSERT INTO master_accounts (account_id, account_name) VALUES (? ,?)''',(666, name))
+            print('Master Account Added')
+        except:
+            print('WARRNING: MASTER ACCOUNT ALREADY EXISTS')
+    
+    conn.commit()
+    #querry database
+    c.execute("SELECT * FROM users")
+    records = c.fetchall()
+    print(records)
+
+     # Commit changes
+    conn.close()
+
+
+create_database()
+add_ma_users()
+
+accounts_window()
+
+accounts_button = Button(root, text="ACCOUNTS", command = lambda: accounts(), width=button_width, bg=button_color2, fg=button_text_color1)
+accounts_button.grid(row=30, column=0, sticky="W", pady=(button_padding,0))
+
+account_window_button = Button(root, text="ACCOUNT WINDOW", command = lambda: accounts_window(),width=button_width, bg='green', fg=button_text_color1)
+account_window_button.grid(row=31, column=0, sticky="W", pady=(button_padding,0))
+
+
+    
 # ================  POSITIONS =============
 def account_positions():
 	global q
@@ -469,18 +703,7 @@ def account_positions():
 	#df_positions.to_excel(filename, header=True, )
 	return('success')
 
-# ===================== ACCOUNT BALANCES - COMBINED
-def account_balances():
-	global q
-	filename = os.path.join(filefolder, id+'-balances-'+time_name()+'.xlsx')
-	dict_balances = q.account_balances(id)
-	df_combined_balances3 = pd.DataFrame.from_dict(dict_balances['sodPerCurrencyBalances'])# sod per Currency balances : The MOST ACCURATE to what is shown in account.
-	df_combined_balances4= pd.DataFrame.from_dict(dict_balances['sodCombinedBalances'])# sod combined balances : Combined totals of sod per currency for use in 3rd row
-	display(df_combined_balances3)
-	display(df_combined_balances4)
-	df_combined_balances3.to_excel(filename, header=True)
-	df_combined_balances4.to_excel(filename, header=True)
-	return('success')
+
 
 # ORDERS
 def orders(start_time):
