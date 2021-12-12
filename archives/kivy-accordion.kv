@@ -1,0 +1,61 @@
+<MyLayout>
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        padding: 0
+        spacing: 20
+
+        Accordion:
+            orientation: 'vertical'
+
+            AccordionItem:
+                title: 'Panel 1'
+                Label:
+                    text:"Panel 1 text"
+                    font_size: 32
+
+            AccordionItem:
+                title: 'Panel 1'
+                Label:
+                    text:"Panel 1 text"
+                    font_size: 32
+
+            AccordionItem:
+                title: 'Panel 2'
+                Label:
+                    text:"Panel 2 text"
+                    font_size: 32
+            AccordionItem:
+                title: 'Panel 3'
+                Carousel:
+                    direction:"right"
+                    AsyncImage:
+                        source: "https://imgix.bustle.com/uploads/image/2018/4/12/15e10b2f-ef65-4b81-90fb-b532c47b81aa-fotolia_193137481_subscription_monthly_m.jpg?w=1200&h=630&q=70&fit=crop&crop=faces&fm=jpg"
+                    AsyncImage:
+                        source: "https://www.pethealthnetwork.com/sites/default/files/content/images/feeding-senior-dogs-fb-183088275.jpg"
+                    AsyncImage:
+                        source: "https://wallup.net/wp-content/uploads/2018/10/07/633123-breeds-dogs-various.jpg"
+
+            AccordionItem:
+                title: 'Panel 4'
+                Label:
+                    text:"Panel 4 text"
+                    font_size: 32
+
+        Carousel:
+            direction:"right"
+
+            AsyncImage:
+                source: "https://imgix.bustle.com/uploads/image/2018/4/12/15e10b2f-ef65-4b81-90fb-b532c47b81aa-fotolia_193137481_subscription_monthly_m.jpg?w=1200&h=630&q=70&fit=crop&crop=faces&fm=jpg"
+
+            AsyncImage:
+                source: "https://www.pethealthnetwork.com/sites/default/files/content/images/feeding-senior-dogs-fb-183088275.jpg"
+            AsyncImage:
+                source: "https://wallup.net/wp-content/uploads/2018/10/07/633123-breeds-dogs-various.jpg"
+
+
+            
+
+
+        

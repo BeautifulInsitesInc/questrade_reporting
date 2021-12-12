@@ -1,6 +1,14 @@
+#################################################
+#  VERY FIRST ATTEMPT WITH QUESTRADE API        #
+#  OFFICIAL VERSION 1.0                         #
+#################################################
+
+
 #import questrade_api as qt
-from questrade_api import *
-from riskmit_live_review import *
+from rm_questrade_api import *
+from rm_riskmit_live_review import *
+#from rm_database_update import*
+#pipfrom rm_manage_database import *
 from datetime import datetime, timedelta
 import configparser
 import urllib
@@ -14,7 +22,8 @@ import os, sys
 from IPython.display import display
 from contextlib import contextmanager # for database manager
 import pyodbc  # for database manager
-#import sys  # for database manager
+import subprocess # for running windows applications and launching other .py files
+
 
 button_width = 19
 button_padding = 2
@@ -28,61 +37,16 @@ database ='riskmit.db'
 
 print('Drivers :',pyodbc.drivers())
 
-# =================== DATA BASE CONNECTION MANAGER ==============
-@contextmanager
-def open_db_connection(commit=False):
-    connection = pyodbc.connect('Driver = {QB SQL Anywhere}; Database = rismit.db; Trusted_Connection = yes;')
-    cursor = connection.cursor()
-    try:
-        yield cursor
-    except pyodbc.DatabaseError as err:
-        error, = err.args
-        sys.stderr.write(error.message)
-        cursor.execute("ROLLBACK")
-        raise err
-    else:
-        if commit:
-            cursor.execute("COMMIT")
-        else:
-            cursor.execute("ROLLBACK")
-    finally:
-        connection.close()
-
-    #call it using: - connection will close when you leave with this block
-    #with open_db_connection("...") as cursor:
-    # Your code here
-
-# ================== CLOSE OTHER WINDOWS IF CLOSED =======================
-#def close_window():
-#    global running
-#    running = False # turn off while loop
-#    print('close_window was run')
-#    accounts_window.w1.destroy()
- #   root.destroy()
-   
-# =========================== GUI =============================
+# =============================================================   
+# =================== MAIN WINDOW =============================
+# =============================================================
 root = Tk()
 #root.protocol("WM_DELETE_WINDOW", close_window)
 root.title("InvestInU Reporting")
 #root.geometry("500x600")
-root.iconbitmap('favicon.ico')
+root.iconbitmap('assets/favicon.ico')
 #root.columnconfigure(0, weight=1)
 #root.columnconfigure(1, weight=3)
-#--------- CLOSE OTHER WINDOWS IF CLOSED -----------------
-
-running = True;
-print("tkinter window is running")
-# This is an endless loop stopped only by setting 'running' to 'False'
-#while running:
- #   if not running:
- #       print('window close has been triggered')
- #       break
-    #cv.create_oval(i, i, i+1, i+1)
-    #root.update() 
-
-
-
-
 
 # ------ TEST PRINT VARIABLES ---------------------
 def test_print():
@@ -153,7 +117,7 @@ master_account_combo.current(0)
 master_account_combo.grid(row=0, column=0, sticky="W")
 master_account_combo.bind('<<ComboboxSelected>>', lambda x: master_account_set(master_account_combo.get()))
 
-master_account_set(master_account_combo.get())
+#master_account_set(master_account_combo.get())
 
 #=================================================================================
 # ================================ ACCOUNTS ======================================
@@ -180,77 +144,7 @@ accounts_button.grid(row=29, column=0, sticky="W")
 accounts_label = Label(root, text=' ', relief = "flat")
 accounts_label.grid(row=29, column=1, sticky="W",pady=(button_padding,0))
 
-#==================================================================================
-# ===================== ACCOUNT BALANCES ==========================================
-def balances(id):
-    dict_balances = q.account_balances(id)
-    df_combined_balances3 = pd.DataFrame.from_dict(dict_balances['sodPerCurrencyBalances'])# sod per Currency balances : The MOST ACCURATE to what is shown in account.
-    df_combined_balances4 = pd.DataFrame.from_dict(dict_balances['sodCombinedBalances'])# sod combined balances : Combined totals of sod per currency for use in 3rd row
-    display(df_combined_balances3)
-    display(df_combined_balances4)
-    return (df_combined_balances3, df_combined_balances4)
 
-balances_button = Button(root, text="BALANCES", command = lambda : account_balances('28148589'), width=button_width, bg=button_color2, fg=button_text_color1)
-balances_button.grid(row=30, column=0, sticky="W")
-balances_label = Label(root, text=' ',   relief = "flat")
-balances_label.grid(row=30, column=1, sticky="W",pady=(button_padding,0))
-
-# ================================================================================
-# ===================  POSITIONS ================================================
-def positions(id):
-    dict_positions = q.account_positions(id)
-    position_list = dict_positions['positions']
-    df_positions = pd.DataFrame.from_dict(position_list)
-    df_positions.sort_values(by='symbol',inplace=True) # sort by symbol
-    df_positions.rename({'openQuantity':'open_qty','closedQuantity':'closed_qty' }, axis=1, inplace=True) # clean up column names
-    display(df_positions)
-    return df_positions
-
-postions_button = Button(root, text="POSITIONS", command = lambda : account_positions('28148589'), width=button_width, bg=button_color2, fg=button_text_color1)
-postions_button.grid(row=35, column=0, sticky="W")
-postions_label = Label(root, text=' ', relief = "flat")
-postions_label.grid(row=35, column=1, sticky="W",pady=(button_padding,0))
-
-# =========================================================================
-# ============ DATABASE ===================================================
-#==========================================================================
-def create_database():
-    print('Running create database')
-    conn = sqlite3.connect('riskmit.db')
-    c = conn.cursor() #Create a cursor instance
-
-    # ----------------------------------------------------------------
-    # ------------ CREATE USER TABLE ---------------------------------
-    # ----------------------------------------------------------------
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
-        user_name text unique,
-        first_name text,
-        last_name text
-        )
-        ''')
-
-    # ---------------------------------------------------------------
-    # ------------- CREATE MASTER ACCOUNT TABLE  --------------------
-    # ---------------------------------------------------------------
-    c.execute('''CREATE TABLE IF NOT EXISTS master_accounts(
-            id integer PRIMARY KEY,
-            account_id integer,
-            account_name text unique
-            )''')
-
-    # ---------------------------------------------------------------
-    # ------------ LIVE POSITIONS TABLE  ----------------------------
-    # ---------------------------------------------------------------
-    #c.execute('''CREATE TABLE if not exists positions (
-    #    
-    #    )
-    #    ''')
-
-    conn.commit() # Commit changes
-    c.close()
-    conn.close() # close data base
-
-#create_database()
 
 # ------ ADD USERS TO MASTER ACCOUNT LIST -------
 def add_ma_users():
@@ -274,12 +168,22 @@ def add_ma_users():
     conn.close()
 # =============== END DATABASE ========================================
 
+def browes_database():
+    subprocess.Popen('"C:\\Program Files (x86)\\DB Software Laboratory\\Database Browser\\DatabaseBrowser.exe"')
+
 account_window_button = Button(root, text="ACCOUNT WINDOW", command = lambda: accounts_window(database),width=button_width, bg='green', fg=button_text_color1)
 account_window_button.grid(row=50, column=0, sticky="W", pady=(button_padding,0))
+database_update_button = Button(root, text="DATABASE UPDATE", command = lambda: database_update(database),width=button_width, bg='green', fg=button_text_color1)
+database_update_button.grid(row=55, column=0, sticky="W", pady=(button_padding,0))
+database_manage_button = Button(root, text="MANAGE DATABASE", command = lambda: subprocess.Popen("python rm_manage_database.py", shell=True),width=button_width, bg='green', fg=button_text_color1)
+database_manage_button.grid(row=55, column=0, sticky="W", pady=(button_padding,0))
+viewer_button = Button(root, text="BROWES DATABASE", command = lambda: browes_database(),width=button_width, bg='green', fg=button_text_color1)
+viewer_button.grid(row=57, column=0, sticky="W", pady=(button_padding,0))
 
-create_database()
-add_ma_users()
-accounts_window(database) # OPEN LIVE ACCOUNT WINDOW
+#create_database()
+#add_ma_users()
+#manage_database(database)
+#accounts_window(database) # OPEN LIVE ACCOUNT WINDOW
 
 
 

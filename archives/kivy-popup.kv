@@ -1,0 +1,36 @@
+#:import Factory kivy.factory.Factory
+
+<MyPopup@Popup>
+    #auto_dismiss - if popup closes when clicked outside or note
+    auto_dismiss: False
+    size_hint: 0.6, 0.2
+    position_hint: {"x":0.2, "top":0.9}
+    title: "This is my popup"
+    # popup can only have 1 widget, to get around, use boxlayout
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+        Label:
+            text: "This is the label"
+        Button:
+            text:"Close"
+            font_size: 24
+            on_release: root.dismiss()
+
+
+<MyLayout>
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        padding: 0
+        spacing: 20
+
+        Label:
+            text: "Popup Stuff"
+            font_size:32
+
+        Button:
+            text: 'Popup'
+            font_size: 32
+            on_release: Factory.MyPopup().open()

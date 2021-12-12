@@ -1,0 +1,35 @@
+# use hex colors : utilis.get_color_from_he('666666')
+#:import utils kivy.utils
+
+<MyLayout>
+
+    BoxLayout:
+        orientation: 'vertical'
+        size: root.width, root.height
+
+        Label:
+            text: 'Answer goes here'
+            id: label_answer
+
+        Label:
+            text: "Name"
+            id: label_name
+
+        TextInput:
+            multiline:False
+            id: input_name
+
+        Label:
+            text: "Something"
+            id: label_something
+
+        TextInput:
+            multiline: False
+            id: input_something
+
+        Button:
+            text: "Submit"
+            font_size: 32
+            background_normal: ''
+            background_color: (0,0,1,1)
+            on_press: root.press()

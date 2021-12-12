@@ -1,0 +1,29 @@
+<MyLayout>
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        Label:
+            markup: True
+            id: progress_label
+            text: "This is [b]Bold[/b]Opened"
+
+        ProgressBar:
+            id: my_progress_bar
+            value: 0
+            min: -5
+            max: 15
+            pos_hint: {'x':.1}
+            size_hint_x: .8
+
+        Button:
+            text: "Increase"
+            on_press: root.press_it()
+            font_size: 32
+
+        Button:
+            text: "Decrease"
+            on_press: root.press_back()
+            font_size: 32
+
+

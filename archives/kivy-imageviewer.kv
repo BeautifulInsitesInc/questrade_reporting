@@ -1,0 +1,152 @@
+WindowManager:
+    MainMenu:
+    Administration:
+    Filepicker:
+    FloatTest:
+
+<MainMenu>:
+    name: "MainMenu"
+
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        padding: 0
+        spacing: 20
+
+        Label:
+            text: "MAIN MENU"
+            font_size: 20
+            size_hint: (None,None)
+            width: 100
+            height: 25
+            pos_hint: {'center_x':.5}
+
+        RoundedButton:
+            text: "ADMIN"
+            font_size: 32
+            size_hint: (.5, .2)
+            pos_hint: {'center_x':.5}
+            #width : 200
+            #height: 40
+            on_release:
+                app.root.current = "Administration"
+                root.manager.transition.direction = "left"
+
+        RoundedButton:
+            text: "File Picker"
+            font_size: 32
+            size_hint: (.5, .2)
+            pos_hint: {'center_x':.5}
+            #width : 200
+            #height: 40
+            on_release:
+                app.root.current = "filepicker"
+                root.manager.transition.direction = "left"
+
+        Button:
+            text: "TOP DASHBOARD"
+
+<Button>
+    font_size:20
+    background_normal: ''
+    background_color: (0,0,1,1)
+
+<TextInput>
+    font_size:20
+    background_color: (150/255,150/255,150/255,1)
+
+<Label>
+    font_size:30
+
+<Administration>:
+    name: "Administration"
+
+    canvas.before:
+        Color:
+            rgba: (240/255,240/255,240,255,1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        padding:10
+        spacing:20
+
+        Label:
+            text: "Administration"
+            background_color:(0,0,1,1)
+            canvas.before:
+                Color:
+                    rgba: self.background_color
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            #text properties
+            color: (0,1,0,1)
+
+        Button:
+            text: "Users"
+            
+        Button:
+            text: "Master Accounts"
+
+        Button:
+            text: "Trading Accounts"
+
+        Button:
+            text: "Back"
+            font_size: 32
+            pos_hint: {'center_x':.5}
+            size_hint: (.5, .5)
+            on_release: 
+                app.root.current = "MainMenu"
+                root.manager.transition.direction = "right"
+
+<Filepicker>:
+    name: "filepicker"
+
+    BoxLayout:
+        id: my_widget
+        orientation: "vertical"
+        size: root.width, root.height
+
+        padding:10
+        spacing:20
+
+        Image:
+            id: my_image
+            source: ""
+
+        FileChooserListView:
+            id: filechooser
+            on_selection: filepicker.my_widget.selected(filechooser.selection)
+
+<FloatTest>:
+    name: "FloatTest"
+   
+    FloatLayout:
+        size: root.width, root.height 
+
+        Button:
+            text: "Back"
+            # {"x", "y", "top, "bottom", "left", "right"}
+            pos_hint: {"x":0, "y":1}
+
+<RoundedButton@Button>
+    background_color: (0,0,0,0)
+    background_normal: ''
+    canvas.before:
+        Color:
+            rgba: (48/255,84/255,150/255,1)
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [58]
+
+
+       
+       

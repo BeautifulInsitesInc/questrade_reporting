@@ -1,0 +1,26 @@
+<MyLayout>
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        padding: 0
+        spacing: 20
+
+        Splitter:
+            sizable_from: 'bottom'
+
+            Label:
+                id: click_label
+                text: "Pick favourite below"
+                font_size:32
+        Splitter:
+            sizable_from: 'bottom'
+            Spinner:
+                id: spinner_id
+                text: 'spinner'
+                font_size: 32
+                values: ["pepperonie", "cheese", "mushroom"]
+                on_text: root.spinner_clicked(spinner_id.text)
+
+        Label:
+            text: "some label"

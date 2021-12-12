@@ -1,0 +1,241 @@
+#:kivy 2.0
+#:import FadeTransition kivy.uix.screenmanager.FadeTransition
+#:import DampedScrollEffect kivy.effects.dampedscroll.DampedScrollEffect
+#:import MDRoundFlatButton kivymd.uix.button.MDRoundFlatButton
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import gch kivy.utils.get_color_from_hex
+#:import StiffScrollEffect kivymd.effects.stiffscroll.StiffScrollEffect
+
+ScreenManager:
+    id: sm_main
+    ScreenLogin:
+        name: "screen_login"
+        id: login_screen
+        MDCard:
+            size_hint: None, None
+            size: 300, 400
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            elevation: 20
+            padding: 25
+            spacing: 25
+            orientation: "vertical"
+            MDLabel:
+                id: welcome_label
+                text: "WELCOME"
+                font_size: 40
+                halign: 'center'
+                size_hint_y: None
+                height: self.texture_size[1]
+                padding_y: 15
+            MDTextField:
+                id: login
+                hint_text: "username"
+                mode: "rectangle"
+                icon_left: "account"
+                size_hint_x: None
+                width: 200
+                font_size: 18
+                pos_hint: {"center_x": 0.5}
+            MDTextField:
+                id: password
+                hint_text: "password"
+                mode: "rectangle"
+                icon_left: "eye_off"
+                size_hint_x: None
+                width: 200
+                font_size: 18
+                pos_hint: {"center_x": 0.5}
+                password: True
+            MDRoundFlatButton:
+                text: "LOG IN"
+                font_size: 12
+                width: 100
+                pos_hint: {"center_x": 0.5}
+                #on_press: app.root.login()
+                on_press:
+                    app.root.current = "screen_main"
+                    sm_main.transition.direction = 'left'
+            MDTextButton:
+                text: "REGISTER"
+                font_size: 12
+                width: 100
+                pos_hint: {"center_x": 0.5}
+                on_press: 
+                    app.root.current = "screen_register"
+                    sm_main.transition.direction = 'up'
+            MDLabel:
+                id: failed
+                text: ""
+                font_size: 40
+                halaign: 'center'
+    ScreenRegistration:
+        name: "screen_registration"
+        MDBoxLayout:
+            orientation: "vertical"
+            #spacing: 20
+            #padding: 20
+            
+            MDToolbar:
+                title: "NEW REGISTRATION"
+
+            MDLabel:
+                text: "Make it work"
+                valign: 'top'
+                halign: 'center'
+                size_hint: (1, 0.1)
+
+            MDLabel:
+                text: "or else"
+                valign: 'top'
+                halign: 'center'
+
+            MDRoundFlatButton:
+                text: "BACK"
+                theme_text: 'Custom'
+                
+                #text_color: app.theme_cls.secondary_color
+                md_bg_color: app.theme_cls.primary_color
+                pos_hint: {'center_x': 0.5, 'center_y':0.5}
+                on_press:
+                    app.root.current = 'login_screen'
+                    sm_main.transition.direction = 'down'
+
+            MDLabel:
+                text: ""
+                size_hint: (1,0.1)
+    ScreenMain:
+        name: "screen_main"
+        id: main_screens
+        
+        #MDNavigationLayout:
+        #MDBoxLayout:
+        #    orientation: 'vertical'
+            #x: toolbar.height
+        ScreenManager:
+            id: sm_sub
+            Screen:
+                name: "overview"
+                MDLabel:
+                    text: "OVERVIEW"
+                    halign: "center"
+            Screen:
+                name: "positions"
+                MDLabel:
+                    text: "OVERVIEW"
+                    halign: "center"
+            Screen:
+                name: "orders"
+                MDLabel:
+                    text: "OVERVIEW"
+                    halign: "center"
+        #MDBoxLayout:
+           
+        MDNavigationDrawer:
+            id: nav_drawer
+            status: 'opened'
+            type:  "standard"
+            elevation: 20
+            ContentNavigationDrawer:
+                orientation: 'vertical'
+                padding: '8dp'
+                spacing: '8dp'
+                ScrollView:
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        #MDLabel:
+                        #    text: "Header text"
+                        MDList:
+                            OneLineIconListItem:
+                                text: "OVERVIEW"
+                                #padding: "0,50,0,0"
+                                on_press:
+                                    #root.nav_drawer.set_state("close")
+                                    sm_sub.current = "overview"
+                                IconLeftWidget:
+                                    icon: 'clipboard-pulse-outline'
+                            OneLineIconListItem:
+                                text: "POSITIONS"
+                                on_press:
+                                    #root.nav_drawer.set_state("close")
+                                    sm_sub.current = "positions"
+                                IconLeftWidget:
+                                    icon: 'account-cash-outline'
+                            OneLineIconListItem:
+                                text: "ORDERS"
+                                on_press:
+                                    #root.nav_drawer.set_state("close")
+                                    sm_sub.current = "orders"
+                                IconLeftWidget:
+                                    icon: "clipboard-arrow-up-outline"
+        MDToolbar:
+            id: toolbar
+            pos_hint: {"top": 1}
+            elevation: 10
+            title: "Risk Manager"
+            left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+            right_action_items: [["logout", lambda x: root.log_out()], ['cog-outline', lambda x: root.open_superuser()]]
+            mode: "center" 
+    ScreenSuperuser:
+        name: "super_user"
+        on_pre_enter: root.load_data()
+        
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDToolbar:
+                title: 'SUPERUSER'
+                icon: 'account-supervisor-outline'
+                anchor_title: 'left'
+                elevation: 10
+                left_action_items: [['backspace-outline', lambda x: root.back_button()]]
+                right_action_items: [["dots-vertical", lambda x: root.open_superuser()]]
+                        
+            MDBoxLayout:
+                #orientation: "vertical"
+                
+                MDNavigationRail:
+                    id: su_rail
+                    md_bg_color: gch('#344954')
+                    color_normal: gch('#718089')
+                    color_active: gch('#f3ab44')
+
+                    MDNavigationRailItem:
+                        icon: 'language-cpp'
+                        text: 'C++'
+
+                    MDNavigationRailItem:
+                        icon: 'language-python'
+                        text: 'Python'
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            id: main_su
+
+                            OneLineIconListItem:
+                                pos_hint: {'center_x': 0.5, 'center_y':0.5}
+                                text: "KivyMD Admin Panel"
+                                on_press: app.open_settings()
+                                IconLeftWidget:
+                                    icon: "cog-box"
+                                    pos_hint: {'center_x': 0.5, 'center_y':0.5}
+
+                            OneLineIconListItem:
+                                halign: 'center'
+                                pos_hint: {'center_x': 0.5, 'center_y':0.5}
+                                text: "CREATE TABLES"
+                                on_press: root.create_tables()
+                                IconLeftWidget:
+                                    icon: "table-plus"
+
+                            ScrollView:
+
+                #MDLabel:
+                #    text: 'User Table Goes Here'
+                #   text_size: self.size
+                #   halign: 'center'
+                #    valign: 'top'
+                    
+
+                #ScrollView:              
+                                    
+
